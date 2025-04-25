@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.endpoints import auth, users
+from app.api.endpoints import auth, users, transactions
 from app.core.logging import logger
 from app.db.session import engine
 from app.db.base import Base
@@ -32,6 +32,10 @@ app.add_middleware(
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
+
+app.include_router(
+    transactions.router, prefix="/api/transactions", tags=["transactions"]
+)
 
 
 @app.exception_handler(Exception)
