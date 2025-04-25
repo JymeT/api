@@ -1,27 +1,25 @@
 [project]
-name = "my_fastapi_service"
+name = "api"
 version = "0.1.0"
-description = "FastAPI service with SQLAlchemy, Pydantic, and authentication"
+description = "Add your description here"
 authors = [
-    { name = "Your Name", email = "your.email@example.com" }
+    { name = "Emad Anwer", email = "emadanwer.official@gmail.com" }
 ]
 dependencies = [
-    "fastapi>=0.104.0",
-    "uvicorn>=0.23.2",
-    "sqlalchemy>=2.0.22",
-    "pydantic>=2.4.2",
+    "fastapi[standard]>=0.115.12",
+    "sqlalchemy>=2.0.40",
+    "pydantic>=2.11.3",
     "pydantic-settings>=2.9.1",
     "passlib>=1.7.4",
-    "python-jose>=3.3.0",
-    "python-multipart>=0.0.6",
-    "alembic>=1.12.0",
-    "bcrypt>=4.0.1",
-    "email-validator>=2.0.0",
-    "loguru>=0.7.2",
+    "python-jose>=3.4.0",
+    "alembic>=1.15.2",
+    "python-multipart>=0.0.20",
+    "bcrypt>=4.3.0",
+    "email-validator>=2.2.0",
+    "loguru>=0.7.3",
 ]
-requires-python = ">=3.10"
 readme = "README.md"
-license = { text = "MIT" }
+requires-python = ">= 3.8"
 
 [build-system]
 requires = ["hatchling"]
@@ -29,12 +27,10 @@ build-backend = "hatchling.build"
 
 [tool.rye]
 managed = true
-dev-dependencies = [
-    "pytest>=7.4.2",
-    "black>=23.9.1",
-    "isort>=5.12.0",
-    "mypy>=1.6.1",
-]
+dev-dependencies = []
 
-[tool.rye.scripts]
-start = "uvicorn app.main:app --reload" 
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/api"]
