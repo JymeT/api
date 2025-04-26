@@ -1,6 +1,7 @@
 from sqlalchemy import Boolean, Column, Integer, String
 from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import DateTime
+from sqlalchemy.orm import relationship
 
 from app.db.session import Base
 
@@ -15,4 +16,9 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now()) 
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # Relationships
+    reminders = relationship(
+        "Reminder", back_populates="user", cascade="all, delete-orphan"
+    )

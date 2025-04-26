@@ -6,7 +6,7 @@ import re
 class UserBase(BaseModel):
     name: str
     email: EmailStr
-    phone: str = Field(..., regex=r"^\+?[0-9]{10,15}$", examples="01210457898")
+    phone: str = Field(..., pattern=r"^\+?[0-9]{10,15}$", examples=["01210457898"])
 
 
 class UserCreate(UserBase):
@@ -17,7 +17,7 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None
     phone: Optional[str] = Field(
-        None, regex=r"^\+?[0-9]{10,15}$", examples="01210457898"
+        None, pattern=r"^\+?[0-9]{10,15}$", examples=["01210457898"]
     )
     password: Optional[str] = Field(None, min_length=8)
 
