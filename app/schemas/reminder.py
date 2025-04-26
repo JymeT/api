@@ -8,6 +8,7 @@ class ReminderBase(BaseModel):
     name: str = Field(..., max_length=100)
     active: bool = True
     next_date: datetime
+    category: str = Field(..., max_length=50)
     amount: int
     frequency: int  # Frequency in days
     description: Optional[str] = Field(None, max_length=255)
