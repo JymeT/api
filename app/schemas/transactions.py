@@ -3,6 +3,12 @@
 from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
+from enum import Enum
+
+
+class TransactionType(str, Enum):
+    INCOME = "income"
+    OUTCOME = "outcome"
 
 
 # Shared properties
@@ -11,7 +17,7 @@ class TransactionBase(BaseModel):
     amount: (
         float  # Using float for simplicity, consider Decimal for financial precision
     )
-    type: str = Field(..., max_length=50)  # e.g., "income", "expense"
+    type: TransactionType
     category: str = Field(..., max_length=50)  # e.g., "groceries", "salary"
     date: datetime
 
@@ -25,7 +31,7 @@ class TransactionCreate(TransactionBase):
 class TransactionUpdate(BaseModel):
     name: Optional[str] = Field(None, max_length=100)
     amount: Optional[float] = None
-    type: Optional[str] = Field(None, max_length=50)
+    type: Optional[TransactionType] = None
     category: Optional[str] = Field(None, max_length=50)
     date: Optional[datetime] = None
 
