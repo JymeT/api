@@ -174,7 +174,9 @@ def get_monthly_spending(
     *,
     db: Session = Depends(get_db),
     current_user: UserModel = Depends(get_current_active_user),
-    year: Optional[int] = Query(None, description="Filter by year (defaults to current year)")
+    year: Optional[int] = Query(
+        None, description="Filter by year (defaults to current year)"
+    ),
 ) -> Any:
     """
     Get monthly outcome totals for the current user.
@@ -183,38 +185,40 @@ def get_monthly_spending(
     # Default to current year if not specified
     if not year:
         year = datetime.now().year
-    
+
     logger.info(f"Getting monthly spending for user {current_user.id} for year {year}")
-    
+
     # Query to get monthly totals of outcome transactions
     monthly_totals = (
         db.query(
-            extract('month', TransactionModel.date).label('month'),
-            func.sum(TransactionModel.amount).label('total')
+            extract("month", TransactionModel.date).label("month"),
+            func.sum(TransactionModel.amount).label("total"),
         )
         .filter(
             TransactionModel.user_id == current_user.id,
             TransactionModel.type == "outcome",
-            extract('year', TransactionModel.date) == year
+            extract("year", TransactionModel.date) == year,
         )
-        .group_by(extract('month', TransactionModel.date))
+        .group_by(extract("month", TransactionModel.date))
         .all()
     )
-    
+
     logger.info(f"Found {len(monthly_totals)} months with outcome transactions")
-    
+
     # Create a dictionary with all months initialized to 0
     result = {month: 0.0 for month in range(1, 13)}
-    
+
     # Fill in the actual totals (as absolute values since outcome transactions are negative)
     for item in monthly_totals:
         month_num = int(item.month)
         # Convert to absolute value since outcome transactions are negative
         result[month_num] = abs(float(item.total))
-        
+
     # For better readability, convert month numbers to month names
-    named_result = {calendar.month_name[month]: amount for month, amount in result.items()}
-    
+    named_result = {
+        calendar.month_name[month]: amount for month, amount in result.items()
+    }
+
     logger.info(f"Monthly spending data generated: {named_result}")
     return named_result
 
