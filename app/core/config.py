@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # Security settings
     SECRET_KEY: str
     ALGORITHM: str
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 55555555555555
 
     # Logging settings
     LOG_LEVEL: str = "INFO"
@@ -18,4 +18,4 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
-settings = Settings() 
+settings = Settings()
