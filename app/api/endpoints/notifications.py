@@ -103,7 +103,7 @@ def notification_actions(
             name=f"Payment for {notification.name}",
             amount=reminder.amount,
             type=TransactionType.OUTCOME,
-            category="Reminder Payment",
+            category=reminder.category,
         )
         db.add(new_transaction)
 
@@ -132,11 +132,9 @@ def notification_actions(
 
     elif notification_update.status == NotificationStatus.EXTENDED:
         # Update the notification date by one day
-        notification.date = notification.date + timedelta(days=1)
-        notification.updated_at = datetime.now()
-        db.add(notification)
+
+        db.delete(notification)  # This is a jump will handel it later
         db.commit()
-        db.refresh(notification)
 
         return notification
 

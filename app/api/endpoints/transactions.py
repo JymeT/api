@@ -1,7 +1,8 @@
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.api.deps import get_current_active_user, get_db
 from app.core.logging import logger
@@ -83,8 +84,10 @@ def read_transactions(
     Retrieve transactions for the current user.
     Optional filtering by transaction type (income/outcome).
     """
-    query = db.query(TransactionModel).filter(
-        TransactionModel.user_id == current_user.id
+    query = (
+        db.query(TransactionModel)
+        .filter(TransactionModel.user_id == current_user.id)
+        .order_by(TransactionModel.date.desc())
     )
 
     # Apply type filter if provided
@@ -105,6 +108,63 @@ def read_transactions(
     return [
         convert_db_transaction_to_schema(transaction) for transaction in db_transactions
     ]
+
+
+@router.get("/dashboard/categories", response_model=Dict[str, float])
+def get_transaction_categories_breakdown(
+    *,
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_active_user),
+) -> Any:
+    """
+    Get breakdown of transaction categories for pie chart visualization.
+    Returns the proportion of spending in each category.
+    """
+    # Add debug logging
+    logger.info(f"Starting category breakdown calculation for user {current_user.id}")
+
+    # Get all outcome transactions for this user
+    transactions = (
+        db.query(
+            TransactionModel.category, func.sum(TransactionModel.amount).label("total")
+        )
+        .filter(
+            TransactionModel.user_id == current_user.id,
+            TransactionModel.type == "outcome",
+        )
+        .group_by(TransactionModel.category)
+        .all()
+    )
+
+    # Debug log the found transactions
+    logger.info(f"Found {len(transactions)} category groups for user {current_user.id}")
+    for t in transactions:
+        logger.info(f"Category: {t.category}, Total: {t.total}")
+
+    # Calculate total spending (as absolute value since outcome amounts are negative)
+    total_spending = sum(abs(t.total) for t in transactions) if transactions else 0
+    logger.info(f"Total spending: {total_spending}")
+
+    # If no transactions found, return empty dict
+    if not transactions:
+        logger.info(f"No outcome transactions found for user {current_user.id}")
+        return {}
+
+    # Even if total spending is 0, return the categories with equal proportions
+    if total_spending == 0:
+        logger.info(
+            f"Total spending is zero, returning equal proportions for all categories"
+        )
+        equal_proportion = round(1.0 / len(transactions), 2) if transactions else 0
+        result = {t.category: equal_proportion for t in transactions}
+        logger.info(f"Generated equal proportions: {result}")
+        return result
+
+    # Calculate proportion of spending for each category
+    result = {t.category: round(abs(t.total) / total_spending, 2) for t in transactions}
+
+    logger.info(f"Generated category breakdown: {result}")
+    return result
 
 
 @router.get("/{transaction_id}", response_model=Transaction)

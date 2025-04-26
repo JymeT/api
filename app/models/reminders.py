@@ -21,6 +21,7 @@ class Reminder(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     active = Column(Boolean, default=True, nullable=False)
     next_date = Column(DateTime, nullable=False)
+    category = Column(String(50), nullable=False)
     amount = Column(Integer, nullable=False)
     frequency = Column(Integer, nullable=False)  # Frequency in days
     description = Column(Text, nullable=True)
