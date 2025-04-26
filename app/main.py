@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.endpoints import auth, users, transactions, reminders, notifications
+from app.api.endpoints import auth, users, transactions, reminders, notifications, dummy_data
 from app.core.logging import logger
 from app.db.session import engine
 from app.db.base import Base
@@ -39,6 +39,9 @@ app.include_router(
 app.include_router(reminders.router, prefix="/api/reminders", tags=["reminders"])
 app.include_router(
     notifications.router, prefix="/api/notifications", tags=["notifications"]
+)
+app.include_router(
+    dummy_data.router, prefix="/api/dummy-data", tags=["dummy-data"]
 )
 
 
