@@ -17,6 +17,29 @@ from app.schemas.notification import (
 router = APIRouter()
 
 
+@router.post(
+    "/", response_model=NotificationResponse, status_code=status.HTTP_201_CREATED
+)
+def add_notification(
+    notification: NotificationCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Create a new notification for the current user.
+    """
+    db_notification = Notification(
+        user_id=current_user.id,
+        reminder_id=notification.reminder_id,
+        name=notification.name,
+        date=notification.date or datetime.now(),
+    )
+    db.add(db_notification)
+    db.commit()
+    db.refresh(db_notification)
+    return db_notification
+
+
 @router.get("/", response_model=List[NotificationResponse])
 def list_notifications(
     db: Session = Depends(get_db),
@@ -60,7 +83,7 @@ def notification_actions(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Notification not found",
         )
-    
+
     # Get the reminder associated with this notification
     reminder = notification.reminder
     if not reminder:
@@ -71,7 +94,7 @@ def notification_actions(
 
     # Store notification data before potential deletion for the response
     notification_data = NotificationResponse.model_validate(notification.__dict__)
-    
+
     # Handle different status updates
     if notification_update.status == NotificationStatus.ACCEPTED:
         # Create a new transaction record
@@ -83,30 +106,30 @@ def notification_actions(
             category="Reminder Payment",
         )
         db.add(new_transaction)
-        
+
         # Update the reminder date by the frequency
         reminder.next_date = reminder.next_date + timedelta(days=reminder.frequency)
         db.add(reminder)
-        
+
         # Remove the notification
         db.delete(notification)
         db.commit()
-        
+
         # Return the notification data that was deleted
         return notification_data
-        
+
     elif notification_update.status == NotificationStatus.REFUSED:
         # Update the reminder date by the frequency
         reminder.next_date = reminder.next_date + timedelta(days=reminder.frequency)
         db.add(reminder)
-        
+
         # Remove the notification
         db.delete(notification)
         db.commit()
-        
+
         # Return the notification data that was deleted
         return notification_data
-        
+
     elif notification_update.status == NotificationStatus.EXTENDED:
         # Update the notification date by one day
         notification.date = notification.date + timedelta(days=1)
@@ -114,7 +137,7 @@ def notification_actions(
         db.add(notification)
         db.commit()
         db.refresh(notification)
-        
+
         return notification
 
     # If we reach here, update the notification status
@@ -122,5 +145,5 @@ def notification_actions(
     db.add(notification)
     db.commit()
     db.refresh(notification)
-    
+
     return notification
