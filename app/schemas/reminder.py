@@ -8,6 +8,7 @@ class ReminderBase(BaseModel):
     name: str = Field(..., max_length=100)
     active: bool = True
     next_date: datetime
+    amount: int
     frequency: int  # Frequency in days
     description: Optional[str] = Field(None, max_length=255)
 
@@ -24,6 +25,7 @@ class ReminderUpdate(BaseModel):
     next_date: Optional[datetime] = None
     frequency: Optional[int] = None
     description: Optional[str] = Field(None, max_length=255)
+    amount: Optional[int] = None
 
 
 # Properties shared by models stored in DB
